@@ -6,8 +6,8 @@ source( 'fetch_data.R' )
 #
 ## set rowlimit for debugging, use -1 for production
 #
-#rowLimit<- 10 # debug
-rowLimit<- -1 # production
+rowLimit<- 100 # debug
+#rowLimit<- -1 # production
 
 #
 ## setup paths -- relative to current WD
@@ -69,7 +69,7 @@ features.table<- NULL
 ##
 ## construct a vector of the column names we're keeping and a mask vector to compare against the original set
 ##
-features.keep<- features[grep( "mean|std", features )]
+features.keep<- features[grep( "mean\\(\\)|std\\(\\)", features )]
 features.mask<- (features %in% features.keep)  
 
 # start building the corpus from the biggest piece -- X data
@@ -94,17 +94,21 @@ subjects.train<- fread( trainSet.subjfileName, nrows=rowLimit )
 ## put it all together in one big, hairy data frame !
 # note order of outcome first, then inputs -- subject is kinda in the middle
 # also note test on top of train -- no reason, just did it that way.  BUT, has to be consistent.
-Corpus<- as.data.frame( cbind( # y, 
-                               y.class, rbind( subjects.test, subjects.train), Corpus ) )
+Corpus<- as.data.frame( cbind( rbind( subjects.test, subjects.train), # y, 
+                               y.class, Corpus ) )
 # add labels for the first two columns and the kept measurement columns
 ##
 ## NB> This handles step 4 from the assignment:
 ##  (4. Appropriately labels the data set with descriptive variable names.)
 ##
-colnames(Corpus)<- c( # "ActivityID", 
-                      "Activity", "SubjectNum", features.keep )
+colnames(Corpus)<- c(  "SubjectNum", # "ActivityID", 
+                      "Activity", features.keep )
 
 y<- NULL; y.class<- NULL; subjects.test<- NULL; subjects.train<- NULL; X.test<- NULL; X.train<- NULL
+
+# it's convenient to work with Activity and Subject as Factors later on...
+Corpus$Activity<- as.factor( Corpus$Activity )
+Corpus$SubjectNum<- as.factor( Corpus$SubjectNum )
 
 #
 ## Corpus now holds ALL the data combined
@@ -115,3 +119,9 @@ y<- NULL; y.class<- NULL; subjects.test<- NULL; subjects.train<- NULL; X.test<- 
 # (3. Uses descriptive activity names to name the activities in the data set) --> See comment in Step 1/reading activities above
 # (4. Appropriately labels the data set with descriptive variable names.)
 # 5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+subjects<- levels( Corpus$SubjectNum )
+activies<- levels( Corpus$Activity )
+
+
+
