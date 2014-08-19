@@ -122,5 +122,11 @@ Corpus$SubjectNum<- as.factor( Corpus$SubjectNum )
 
 
 corp.summary<- aggregate.data.frame( Corpus, by=list( Corpus$SubjectNum, Corpus$Activity ), FUN=mean )
+corp.summary<- corp.summary[, -3:-4]
+colnames( corp.summary )[1:2]<- c( "SubjectNum", "Activity" )
+corp.summary<- corp.summary[ order( corp.summary$SubjectNum ), ]
+rownames( corp.summary )<- NULL
+
+
 
 
