@@ -6,8 +6,8 @@ source( 'fetch_data.R' )
 #
 ## set rowlimit for debugging, use -1 for production
 #
-rowLimit<- 100 # debug
-#rowLimit<- -1 # production
+#rowLimit<- 100 # debug
+rowLimit<- -1 # production
 
 #
 ## setup paths -- relative to current WD
@@ -118,15 +118,17 @@ Corpus$SubjectNum<- as.factor( Corpus$SubjectNum )
 # (2. Extracts only the measurements on the mean and standard deviation for each measurement. )
 # (3. Uses descriptive activity names to name the activities in the data set) --> See comment in Step 1/reading activities above
 # (4. Appropriately labels the data set with descriptive variable names.)
+
 # 5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
-
 corp.summary<- aggregate.data.frame( Corpus, by=list( Corpus$SubjectNum, Corpus$Activity ), FUN=mean )
-corp.summary<- corp.summary[, -3:-4]
+# aggregate prepends subject and activity in two new columns -- delete them, and relable the new columns
+corp.summary<- corp.summary[, -3:-4] 
 colnames( corp.summary )[1:2]<- c( "SubjectNum", "Activity" )
+# I like the table ordered by subject...
 corp.summary<- corp.summary[ order( corp.summary$SubjectNum ), ]
+# remove the rownames that were added
 rownames( corp.summary )<- NULL
 
-
-
-
+## finally, Save the file!
+write.table( corp.summary, file="Subject-Activity.txt", sep="\t", row.names=FALSE )
